@@ -24,54 +24,102 @@
     </style>
     <script src='http://code.jquery.com/jquery-1.11.0.min.js'></script>
     <script>
-      function shuffle(array) {
-        var currentIndex = array.length
-          , temporaryValue
-          , randomIndex
-          ;
+      function shuffle(arr) {
+        var idx, tmp, rnd;
+        idx = arr.length;
 
-        // While there remain elements to shuffle...
-        while (0 !== currentIndex) {
+        while (0 !== idx) {
+          rnd = Math.floor(Math.random() * idx);
+          idx -= 1;
+          tmp = arr[idx];
+          arr[idx] = arr[rnd];
+          arr[rnd] = tmp;
+        }
+        return arr;
+      }
 
-          // Pick a remaining element...
-          randomIndex = Math.floor(Math.random() * currentIndex);
-          currentIndex -= 1;
+      function shuffleItems() {
+        app.rview.css('visibility', 'inherit');
+        app.rcont.empty();
+        var n = app.items.length;
+        var cnt = 2;
+        for (var j = 0; j < cnt; j++) {
+          app.items = shuffle(app.items);
+          for (var i = 0; i < n; i++) {
+            var item = $('<div>').addClass('raffle-item').text(app.items[i]);
+            app.rcont.append(item);
+          }
+        }
+        app.rcont.css('width', app.item_width * n*cnt + 'px');
+      }
 
-          // And swap it with the current element.
-          temporaryValue = array[currentIndex];
-          array[currentIndex] = array[randomIndex];
-          array[randomIndex] = temporaryValue;
+      function raffle() {
+        app.rcont.animate({
+          left: 0
+        }, 10, function() {
+          shuffleItems();
+        });
+        for (var i = 0; i < 10; i++) {
+          app.rcont.animate({
+            left: 0
+          }, 200, function() {
+            shuffleItems();
+          });
         }
 
-        return array;
+        app.rcont.animate({
+          left: 0
+        }, 10, function() {
+          console.log(app.rcont.find('.raffle-item:last').position().left);
+          app.rcont.animate({
+            left: -app.rcont.find('.raffle-item:last').position().left
+          }, 2000).delay(1000).animate({
+            left: -app.rcont.find('.raffle-item:last').position().left+1
+          }, 10, function() {
+            var last = app.rcont.find('.raffle-item:last');
+            var picked = parseInt(last.text());
+            last.detach();
+
+            var idx = $.inArray(picked, app.items);
+            if (idx < 0)
+              console.log('Something went wrong: ' + picked + '   ' + app.items);
+            else
+              app.items.splice(idx, 1);
+
+            var li = $('<li>').addClass('history-item').text(picked);
+            app.hview.append(li);
+          }).animate({
+            left: 0
+          }, 2000);
+        });
       }
 
       $(function() {
-        var cont = $('.raffle-container');
-        var n = 30;
-        var item_width = 80;
-        var items = [];
-        for (var i = 0; i < n; i++) {
-          items.push(1000+i);
+        app = {};
+        app.rview = $('.raffle-view');
+        app.rcont = app.rview.find('.raffle-container');
+        app.hview = $('.history-view');
+        app.start_num = 1000;
+        app.n = 30;
+        app.item_width = 80;
+        app.items = [];
+        for (var i = 0; i < app.n; i++) {
+          app.items.push(app.start_num + i);
         }
-        items = shuffle(items);
-        for (var i = 0; i < n; i++) {
-          var item = $('<div>').addClass('raffle-item').text(items[i]);
-          cont.append(item);
-        }
-        cont.css('width', item_width * n + 'px');
+        app.rview.css('visibility', 'hidden');
 
-        console.log($('.raffle-item').last().position());
-        cont.animate({
-          right: $('.raffle-item').last().position().left
-        }, 2000);
+        var btn = $('#raffle-btn');
+        btn.click(raffle);
       });
     </script>
   </head>
   <body>
-    <div class='raffle-view'>
-      <div class='raffle-container'>
-      </div>
+    <div>
+      <button id='raffle-btn'>Raffle</button>
     </div>
+    <div class='raffle-view'>
+      <div class='raffle-container'></div>
+    </div>
+    <ul class='history-view'></ul>
   </body>
 </html>
