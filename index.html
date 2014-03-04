@@ -1,0 +1,77 @@
+<html>
+  <head>
+    <title>Raffle by. Chidoli</title>
+    <style>
+      .raffle-item {
+        width: 54px;
+        float: left;
+        padding: 4px;
+        margin: 4px;
+        border: #888 solid 2px;
+        color: #333;
+        text-align: center;
+        font-size: 24px;
+      }
+      .raffle-container {
+        position: relative;
+      }
+      .raffle-view {
+        overflow: hidden;
+        width: 800px;
+        border: #BBB solid 2px;
+        padding: 4px;
+      }
+    </style>
+    <script src='http://code.jquery.com/jquery-1.11.0.min.js'></script>
+    <script>
+      function shuffle(array) {
+        var currentIndex = array.length
+          , temporaryValue
+          , randomIndex
+          ;
+
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+
+          // Pick a remaining element...
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex -= 1;
+
+          // And swap it with the current element.
+          temporaryValue = array[currentIndex];
+          array[currentIndex] = array[randomIndex];
+          array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+      }
+
+      $(function() {
+        var cont = $('.raffle-container');
+        var n = 30;
+        var item_width = 80;
+        var items = [];
+        for (var i = 0; i < n; i++) {
+          items.push(1000+i);
+        }
+        items = shuffle(items);
+        for (var i = 0; i < n; i++) {
+          var item = $('<div>').addClass('raffle-item').text(items[i]);
+          cont.append(item);
+        }
+        cont.css('width', item_width * n + 'px');
+
+        console.log($('.raffle-item').last().position());
+        cont.animate({
+          right: $('.raffle-item').last().position().left
+        }, 2000);
+      });
+    </script>
+  </head>
+  <body>
+    <div class='raffle-view'>
+      <div class='raffle-container'>
+      </div>
+    </div>
+  </body>
+</html>
